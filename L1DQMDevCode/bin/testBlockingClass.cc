@@ -4,7 +4,7 @@
       
       \author   Pietro Vischia
       
-      \version  $Id: testBlockingClass.cc,v 0.1 2013/02/27 14:53:38 vischia Exp $                                                                                                       
+      \version  $Id: testBlockingClass.cc,v 1.1 2013/02/27 17:48:55 vischia Exp $                                                                                                       
 */
 
 #include "Vischia/L1DQMDevCode/interface/L1TLSBlock.h"
@@ -87,7 +87,7 @@ int main(int argc, char* argv[])
 
 
   cout<<endl<<"Block by statistics with a threshold of 0.99 per block:"<<endl;
-  cout<<"\t Expected behaviour: [1-35] is a single range without enough statistics to build two blocks"<<endl;
+  cout<<"\t Expected behaviour: run has a single range [1-35] without enough stat, but the single range is still added "<<endl;
   L1TLSBlock::LumiRangeList largeRange = blocker->doBlocking(doubleList, 0.99, L1TLSBlock::BLOCKBY::STATISTICS); // Block by statistics with a threshold of 1000. per block
   cout<<endl<<"Resulting LumiRange vector:"<<endl;
   cout<<endl<<"\t\t start \t end"<<endl;

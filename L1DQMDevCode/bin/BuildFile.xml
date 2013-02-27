@@ -1,0 +1,5 @@
+<use name="Vischia/L1DQMDevCode"/>
+<environment>
+ <bin name="testBlockingClass"  file="testBlockingClass.cc"></bin> 
+</environment>
+<Flags CXXFLAGS="-g"/>

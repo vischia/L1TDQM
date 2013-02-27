@@ -14,8 +14,8 @@
  *
  * Todo: see header file
  *
- * $Date: 2012/10/23 12:01:01 $
- * $Revision: 0.0 $
+ * $Date: 2012/11/06 09:57:39 $
+ * $Revision: 1.1 $
  *
  */
 
@@ -25,7 +25,7 @@
 #include "DQMOffline/L1Trigger/interface/L1TLSBlock.h"
 
 // System include files
-// --
+#include <cmath>
 
 //// User include files
 //#include "DQMServices/Core/interface/DQMStore.h"
@@ -152,36 +152,66 @@ void L1TLSBlock::orderTestIntList(){
 void L1TLSBlock::blockByStatistics(){
   LumiRange currentRange;
   double currentError(0);
-  bool resetFlag(true);
+  bool resetFlag(false); // true = "close current range"
 
-  for(LumiTestDoubleList::iterator i=inputDoubleList_.begin(); i!=inputDoubleList_.end(); i++){
+  LumiTestDoubleList::iterator i = inputDoubleList_.begin();
+  currentRange = std::make_pair(i->first, i->first); // First range
+  for(;i!=inputDoubleList_.end();i++){
     if(resetFlag){
       currentRange = std::make_pair(i->first,i->first);
       resetFlag = false;
     }
     else
-      currentRange = std::make_pair(currentRange.first,i->first);
+      currentRange = std::make_pair(currentRange.first, i->first);
     currentError = computeErrorFromRange(currentRange);
-    if(currentError < thresholdD_){
-      outputList_.push_back(currentRange);
-      resetFlag = true;
+    std::cout << "Range (" << currentRange.first << "," << currentRange.second << ") has error " << currentError << std::endl;
+    if(currentError > thresholdD_){
+      outputList_.push_back(currentRange); // store current range
+      resetFlag = true; // open new range at the next iteration step
     }
-    
   }
+  
+  // Deal with last one
+  if(currentError > thresholdD_)
+    outputList_.push_back(currentRange);
+  else
+    outputList_[outputList_.size()-1].second = currentRange.second;
+      
+  
+//
+//
+//
+//
+//
+//  for(LumiTestDoubleList::iterator i=inputDoubleList_.begin(); i!=inputDoubleList_.end(); i++){
+//    if(resetFlag){
+//      currentRange = std::make_pair(i->first,i->first);
+//      resetFlag = false;
+//    }
+//    else
+//      currentRange = std::make_pair(currentRange.first,i->first);
+//    currentError = computeErrorFromRange(currentRange);
+//    if(currentError < thresholdD_){
+//      outputList_.push_back(currentRange);
+//      resetFlag = true;
+//    }
+//    
+//  }
+
 }
 
 double L1TLSBlock::computeErrorFromRange(LumiRange& lumiRange){
   std::vector<double> errorList;
   errorList.clear();
-
+  
   for(size_t i=0; i < inputDoubleList_.size(); i++){
-    if(inputDoubleList_[i].first>lumiRange.first && inputDoubleList_[i].first<lumiRange.second)
+    if(inputDoubleList_[i].first>=lumiRange.first && inputDoubleList_[i].first<=lumiRange.second)
       errorList.push_back(inputDoubleList_[i].second);
   }
   
-  double error(-1);
+  double error(0);
   for(size_t i=0; i<errorList.size(); i++)
     error += 1 / (errorList[i] * errorList[i] );
-  return error;
+  return std::sqrt(error);
 
 }
